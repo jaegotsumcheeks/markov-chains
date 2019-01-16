@@ -1,6 +1,9 @@
 """Generate Markov text from text files."""
 
 from random import choice
+import sys
+text_file = sys.argv[1]
+word_chunk_size = int(sys.argv[2])
 
 def open_and_read_file(file_path):
     """Take file path as string; return text as string.
@@ -13,7 +16,7 @@ def open_and_read_file(file_path):
     read_file = open(file_path).read()
     return read_file
 
-def make_chains(text_string):
+def make_chains_bigram(text_string):
     """Take input text as string; return dictionary of Markov chains.
 
     A chain will be a key that consists of a tuple of (word1, word2)
@@ -44,7 +47,7 @@ def make_chains(text_string):
 #        empty_list = chains.get((word, text_list[i+1]),[])
 #        chains[(word,text_list[i+1])] = empty_list
     for i in range(len(text_list)-2):
-        #print(text_list[i])      
+        #print(text_list[i])
         new_list = chains.get((text_list[i],text_list[i+1]),[])
         #print(new_list)
         new_list.append(text_list[i+2])
@@ -52,12 +55,54 @@ def make_chains(text_string):
         print(chains)
     return chains
 
+def make_chains(text_string, n):
+    """Take input text as string; return dictionary of Markov chains.
+
+    A chain will be a key that consists of a tuple of (word1, word2)
+    and the value would be a list of the word(s) that follow those two
+    words in the input text.
+
+    For example:
+
+        >>> chains = make_chains("hi there mary hi there juanita")
+
+    Each bigram (except the last) will be a key in chains:
+
+        >>> sorted(chains.keys())
+        [('hi', 'there'), ('mary', 'hi'), ('there', 'mary')]
+
+    Each item in chains is a list of all possible following words:
+
+        >>> chains[('hi', 'there')]
+        ['mary', 'juanita']
+        
+        >>> chains[('there','juanita')]
+        [None]
+    """
+
+    chains = {}
+    text_list = text_string.split()
+#    for i,word in enumerate(text_list):
+#        empty_list = chains.get((word, text_list[i+1]),[])
+#        chains[(word,text_list[i+1])] = empty_list
+    for i in range(len(text_list)-n):
+        #print(text_list[i])
+        chunk = tuple(text_list[i:i+n]) 
+        new_list = chains.get(chunk,[])
+        #print(new_list)
+        new_list.append(text_list[i+n])
+        chains[chunk] = new_list
+        #print(chains)
+    return chains
+
+
+
 
 def make_text(chains):
     """Return text from chains."""
-    
-    current_words = ('Would', 'you')
-    words = ['Would']  
+    random_start_point = list(chains.keys())
+    current_words = random_start_point[0]
+    words = [current_words[0]]  
     valid_key = chains.get(current_words,False)
     while (valid_key is not False):
         first_random_word = choice(chains[current_words])
@@ -66,19 +111,19 @@ def make_text(chains):
         current_words = next_step
         valid_key = chains.get(current_words,False)
         
-        print(next_step)
+        #print(next_step)
     
     
     return " ".join(words)
 
 
-input_path = "green-eggs.txt"
+input_path = text_file
 
 # Open the file and turn it into one long string
 input_text = open_and_read_file(input_path)
 
 # Get a Markov chain
-chains = make_chains(input_text)
+chains = make_chains(input_text,word_chunk_size)
 
 # Produce random text
 random_text = make_text(chains)
