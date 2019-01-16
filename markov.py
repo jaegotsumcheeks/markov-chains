@@ -2,7 +2,6 @@
 
 from random import choice
 
-
 def open_and_read_file(file_path):
     """Take file path as string; return text as string.
 
@@ -47,7 +46,7 @@ def make_chains(text_string):
     for i in range(len(text_list)-2):
         #print(text_list[i])      
         new_list = chains.get((text_list[i],text_list[i+1]),[])
-        print(new_list)
+        #print(new_list)
         new_list.append(text_list[i+2])
         chains[(text_list[i],text_list[i+1])] = new_list
         print(chains)
@@ -56,11 +55,20 @@ def make_chains(text_string):
 
 def make_text(chains):
     """Return text from chains."""
-
-    words = []
-
-    # your code goes here
-
+    
+    current_words = ('Would', 'you')
+    words = ['Would']  
+    valid_key = chains.get(current_words,False)
+    while (valid_key is not False):
+        first_random_word = choice(chains[current_words])
+        next_step = (current_words[1],first_random_word)
+        words.append(first_random_word)
+        current_words = next_step
+        valid_key = chains.get(current_words,False)
+        
+        print(next_step)
+    
+    
     return " ".join(words)
 
 
